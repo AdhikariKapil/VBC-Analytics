@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS admissions (
     gender VARCHAR(10),
     blood_type VARCHAR(5),
     medical_condition VARCHAR(50),
-    date_of_adimission DATE,
+    date_of_admission DATE,
     doctor VARCHAR(100),
     hospital VARCHAR(100),
     insurance_provider VARCHAR(50),

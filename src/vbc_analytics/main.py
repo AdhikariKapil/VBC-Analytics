@@ -58,3 +58,100 @@ def get_connection():
         password=os.getenv("DB_PASSWORD"),
         database=os.getenv("DB_NAME"),
     )
+
+
+def load_and_clean_csv(csv_path: Path) -> pd.DataFrame:
+    log.info("Reading CSV from %s", csv_path)
+    df = pd.read_csv(CSV_PATH)
+
+    # drop PHI
+    df = df.drop(columns=["Name"])
+
+    # parse dates and derive length_of_stay
+    df["Date of Admission"] = pd.to_datetime(df["Date of Admission"])
+    df["Discharge Date"] = pd.to_datetime(df["Discharge Date"])
+    df["LengthOfStay"] = (df["Discharge Date"] - df["Date of Admission"]).dt.days
+
+    # rename to snake_case to match the db schema
+    df = df.rename(
+        columns={
+            "Age": "age",
+            "Gender": "gender",
+            "Blood Type": "blood_type",
+            "Medical Condition": "medical_condition",
+            "Date of Admission": "date_of_admission",
+            "Doctor": "doctor",
+            "Hospital": "hospital",
+            "Insurance Provider": "insurance_provider",
+            "Billing Amount": "billing_amount",
+            "Room Number": "room_number",
+            "Admission Type": "admission_type",
+            "Discharge Date": "discharge_date",
+            "Medication": "medication",
+            "Test Results": "test_results",
+            "LengthOfStay": "length_of_stay",
+        }
+    )
+
+    return df
+
+
+def create_table(cursor, sql: str):
+    cursor.execute(sql)
+
+
+def table_has_rows(cursor) -> bool:
+    cursor.execute("SELECT COUNT(*) FROM admissions")
+    return cursor.fetchone()[0] > 0
+
+
+def truncate_table(cursor):
+    cursor.execute("TRUNCATE TABLE admissions")
+
+
+def build_rows(df: pd.DataFrame) -> list:
+    return [tuple(row) for row in df.itertuples(index=False, name=None)]
+
+
+def insert_rows(cursor, rows: list):
+    cursor.executemany(INSERT_SQL, rows)
+
+
+# main
+def main():
+    args = parse_args()
+    log.info("Starting load in '%s' mode", args.mode)
+
+    df = load_and_clean_csv(CSV_PATH)
+    rows = build_rows(df)
+    log.info("Prepared %d rows for insertion", len(rows))
+
+    schema_sql = load_sql(CREATE_ADMISSION_FILE)
+
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        create_table(cursor, schema_sql)
+
+        if args.mode == "skip" and table_has_rows(cursor):
+            log.info("Table already has data. Skipping load.")
+            return
+
+        if args.mode == "refresh":
+            truncate_table(cursor)
+            log.info("Table truncated.")
+
+        insert_rows(cursor, rows)
+        conn.commit()
+        log.info("Successfully inserted %d rows.", len(rows))
+    except Exception:
+        conn.rollback()
+        log.exception("Load failed. Transaction rolled back")
+        raise
+    finally:
+        cursor.close()
+        conn.close()
+
+
+if __name__ == "__main__":
+    main()
