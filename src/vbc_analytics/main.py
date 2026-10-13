@@ -7,6 +7,9 @@ import mysql.connector
 import pandas as pd
 from dotenv import load_dotenv
 
+# modules
+from vbc_analytics.get_db import PROJECT_ROOT, get_connection
+
 # Configuration of logging and database
 logging.basicConfig(
     level=logging.INFO,
@@ -15,7 +18,6 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 CSV_PATH = PROJECT_ROOT / "data" / "healthcare_dataset.csv"
 SQL_DIR = PROJECT_ROOT / "sql"
 CREATE_ADMISSION_FILE = SQL_DIR / "schema" / "create_admissions.sql"
@@ -47,17 +49,6 @@ def load_sql(path: Path) -> str:
     if not path.exists():
         raise FileNotFoundError(f"SQL file not found: {path}")
     return path.read_text()
-
-
-def get_connection():
-    load_dotenv(PROJECT_ROOT / ".env")
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        port=int(os.getenv("DB_PORT", 3306)),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"),
-    )
 
 
 def load_and_clean_csv(csv_path: Path) -> pd.DataFrame:
