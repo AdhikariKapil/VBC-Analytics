@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+src/vbc_analytics/test.py
 
 # raw data
 data/

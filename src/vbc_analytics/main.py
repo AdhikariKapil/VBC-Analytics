@@ -1,14 +1,11 @@
 import argparse
 import logging
-import os
 from pathlib import Path
 
-import mysql.connector
 import pandas as pd
-from dotenv import load_dotenv
 
 # modules
-from vbc_analytics.services import PROJECT_ROOT, get_connection, load_sql
+from vbc_analytics.utils import PROJECT_ROOT, get_connection, load_sql
 
 # Configuration of logging and database
 logging.basicConfig(
