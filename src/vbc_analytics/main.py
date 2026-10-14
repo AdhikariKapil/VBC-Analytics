@@ -8,7 +8,7 @@ import pandas as pd
 from dotenv import load_dotenv
 
 # modules
-from vbc_analytics.get_db import PROJECT_ROOT, get_connection
+from vbc_analytics.services import PROJECT_ROOT, get_connection, load_sql
 
 # Configuration of logging and database
 logging.basicConfig(
@@ -42,13 +42,6 @@ def parse_args():
     )
 
     return parser.parse_args()
-
-
-def load_sql(path: Path) -> str:
-    # read .sql file from disk and return its contents as a string.
-    if not path.exists():
-        raise FileNotFoundError(f"SQL file not found: {path}")
-    return path.read_text()
 
 
 def load_and_clean_csv(csv_path: Path) -> pd.DataFrame:

@@ -16,3 +16,10 @@ def get_connection():
         password=os.getenv("DB_PASSWORD"),
         database=os.getenv("DB_NAME"),
     )
+
+
+def load_sql(path: Path) -> str:
+    # read .sql file from disk and return its contents as a string.
+    if not path.exists():
+        raise FileNotFoundError(f"SQL file not found: {path}")
+    return path.read_text()
