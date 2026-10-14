@@ -2,10 +2,12 @@
 
 A running log of domain conepts, technical decisions for the vbc-analytics project. Updated as I build.
 
+
 ---
 
 ## 1. Project Overview
 **Name:** `VBC-Analytics`
+
 **Goal:** Build a healthcare claims data pipeline and analytics prototype that ingests claims-like
 data, validates it against clinical and structural rules, stores it in MySQL, and surfaces quality insights.
 
@@ -82,7 +84,7 @@ ones are names, address, phone, email, SSN, dates (except year), medical record 
 ### 3.3 Minimum Necessary Principle
 
 Analytics engineers almost never need to touch PHI tables. Dropping `Name` at ingestion is a
-demonstrationi of this principle.
+demonstration of this principle.
 
 ---
 
@@ -102,7 +104,7 @@ file is. It says "there is a table admissions, it has these columns with these t
 
 - **Physical Schema:** How the data is actually stored on disk. Indexes, partitions, file
 organization, storage engines (InnoDB vs MyISAM), tablespaces, sharding. This is DBA territory
-Example: "admissionisn is stored in InnoDB, partitioned by admission year, with a B-tree index
+Example: "admission is stored in InnoDB, partitioned by admission year, with a B-tree index
 on medical_condition."
 
 
@@ -353,3 +355,9 @@ vbc-analytics/
 (admission_id,) in inject_fault.py - that trailing comma is essential.
 (x,) is one-element tuple. Without the comma, (x) is just x in parentheses,
 and executemany would error.
+
+- **`CREATE TABLE` ... `LIKE` + `INSERT` ... `SELECT`**
+`LIKE` copies the structure (columns, types, primary key). `INSERT SELECT` copies
+the data. This is the standard way to clone a table in MySQL. Using
+`CREATE TABLE AS SELECT` would have skipped the primary key - which we want
+to keep.

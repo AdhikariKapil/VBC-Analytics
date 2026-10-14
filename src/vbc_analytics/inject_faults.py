@@ -29,7 +29,7 @@ FAULTS = [
         "description": "Discharge date set 3 days BEFORE admission date",
         "count": 5,
         "sql": (
-            "UPDATE admissioni_chaos "
+            "UPDATE admission_chaos "
             "SET discharge_date = DATE_SUB(date_of_admission, INTERVAL 3 DAY) "
             "WHERE admission_id = %s"
         ),
@@ -38,7 +38,7 @@ FAULTS = [
         "name": "age_out_of_range",
         "description": "Age set to 200",
         "count": 5,
-        "sql": "UPDATE admissioni_chaos SET age = 200 WHERE admission_id = %s",
+        "sql": "UPDATE admission_chaos SET age = 200 WHERE admission_id = %s",
     },
     {
         "name": "invalid_gender",
@@ -63,8 +63,8 @@ FAULTS = [
         "description": "Admission date set to year 2099",
         "count": 3,
         "sql": (
-            "UPDATE admissioni_chaos "
-            "SET date_of_admissioni = '2099-01-01', discharge_date = '2099-01-05' "
+            "UPDATE admission_chaos "
+            "SET date_of_admission = '2099-01-01', discharge_date = '2099-01-05' "
             "WHERE admission_id = %s"
         ),
     },
@@ -81,16 +81,17 @@ def rebuild_chaos_table(cursor, sql: str):
         if statement:
             cursor.execute(statement)
 
+    cursor.execute("SELECT COUNT(*) FROM admission_chaos;")
     count = cursor.fetchone()[0]
-    log.info("Rebuild admissions_chaos with %d rows", count)
+    log.info("Rebuild admission_chaos with %d rows", count)
 
 
 def pick_ids(cursor, count, offset):
     # select `count` admission_ids starting at `offset`, in a stable order.
     cursor.execute(
         """
-            SELECT admission_id FROM admissions_chaos
-            ORDER BY admission_id LIMIT %s OFFSET %s,
+            SELECT admission_id FROM admission_chaos
+            ORDER BY admission_id LIMIT %s OFFSET %s
             """,
         (count, offset),
     )
