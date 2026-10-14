@@ -100,7 +100,7 @@ Example: "A patient has many admissions; each admission has one provider and one
 - **Logical Schema:** The same thing translated into a specific data model - usally relational.
 Tables, columns, keys, foreign keys. No mention of storage. This is what my create_admissions.sql
 file is. It says "there is a table admissions, it has these columns with these types." Portable
-- you could implement it in MySQL, PostgreSQL, etc
+you could implement it in MySQL, PostgreSQL, etc
 
 - **Physical Schema:** How the data is actually stored on disk. Indexes, partitions, file
 organization, storage engines (InnoDB vs MyISAM), tablespaces, sharding. This is DBA territory
@@ -246,24 +246,26 @@ not as extra garbage rows.
 
 ## 7. Project Structure
 
+```
 vbc-analytics/
 ├── data/
-│ └── healthcare_dataset.csv # raw source (gitignored)
+│   └── healthcare_dataset.csv  # raw source (gitignored)
 ├── docs/
-│ ├── NOTES.md
-│ └── DATA_QUALITY_REPORT.md
+│   ├── NOTES.md
+│   └── DATA_QUALITY_REPORT.md
 ├── sql/
-│ └── schema/
-    └── create_admissions.sql # standalone schema DDL
-├── src/vbc_analytics/
-│ ├── __init__.py
-│ ├── main.py # ETL: CSV → MySQL
-│ └── inject_faults.py # chaos table builder
-│ └── utils.py # DRY module (generic helpers)
-├── .env # DB credentials (gitignored)
+│   └── schema/
+│       └── create_admissions.sql  # standalone schema DDL
+├── src/
+│   └── vbc_analytics/
+│       ├── __init__.py
+│       ├── main.py  # ETL: CSV → MySQL
+│       ├── inject_faults.py  # chaos table builder
+│       └── utils.py  # DRY module (generic helpers)
+├── .env  # DB credentials (gitignored)
 ├── .gitignore
 └── pyproject.toml
-
+```
 ---
 
 ## 8. Design Decision Log
