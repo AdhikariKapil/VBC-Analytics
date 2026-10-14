@@ -224,6 +224,22 @@ confirm the failures match what you injected. If they don't, the rules are broke
 
 This is how we validate DQ rules before trusting a clean report.
 
+### 6.4 Fault Injection - Design Decisions
+
+**Ordered rows, not random:**
+Faults target specific `admission_id` ranges (1-5, 6-10, ...) in a fixed order. This makes
+runs deterministic and reproducible. Random selection would need a seed to be reliable,
+and would obscure which IDs were broken. Ordered rows also make the DQ report traceable -
+every failing ID maps back to a known injection
+
+**UPDATE, not INSERT:**
+Faults corrupt existing rows in place rather than adding new ones. Reasons:
+- Row count stays constant (55500), so chaos vs real comparison is purely a
+value diff, not a count diff
+- It mirros the real failure mode: production data usally arrives corrupted in place,
+not as extra garbage rows.
+- Every failing row in the DQ report maps to a known injected ID.
+
 ---
 
 ## 7. Project Structure
@@ -241,6 +257,7 @@ vbc-analytics/
 │ ├── __init__.py
 │ ├── main.py # ETL: CSV → MySQL
 │ └── inject_faults.py # chaos table builder
+│ └── utils.py # DRY module (generic helpers)
 ├── .env # DB credentials (gitignored)
 ├── .gitignore
 └── pyproject.toml
@@ -327,3 +344,12 @@ vbc-analytics/
 | **OLTP** | Online Transaction Processing - write-optimized systems |
 | **OLAP** | Online Analytical Processing - read-optimized systems |
 | **ACID** | Atomicity, Consistency, Isolation, Durability |
+
+---
+
+## 11. Random things I might need
+
+- **executemany with tuple-of-tuples:**
+(admission_id,) in inject_fault.py - that trailing comma is essential.
+(x,) is one-element tuple. Without the comma, (x) is just x in parentheses,
+and executemany would error.
