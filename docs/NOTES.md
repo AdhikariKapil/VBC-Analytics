@@ -28,7 +28,7 @@ the foundation that models depends on.
 Two payment models in US healthcare:
 
 -**Fee-For-Service (FFS):** Provider is paid for each service delivered.
-Incentive: do more like more test, more procedures, more nights in hospital.
+Incentive: do more like more test, more procedures, more nights in hospital.  
 -**Value-Based Care (VBC):** Provider is paid based on patients outcomes and
 total cost of care for a defined population. Incentive: keep patients well.
 
