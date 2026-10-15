@@ -242,6 +242,43 @@ value diff, not a count diff
 not as extra garbage rows.
 - Every failing row in the DQ report maps to a known injected ID.
 
+**Validated fault injection results:**
+
+| Rule | Injected | Observed in chaos | Status |
+|------|----------|-------------------|--------|
+| negative_billing | 5 | 113 (108 real + 5 injected) | ✓ |
+| discharge_before_admission | 5 | 5 | ✓ |
+| age_out_of_range | 5 | 5 | ✓ |
+| invalid_gender | 5 | 5 | ✓ |
+| null_medical_condition | 5 | 5 | ✓ |
+| negative_room_number | 3 | 3 | ✓ |
+| future_admission_date | 3 | 3 | ✓ |
+| los_inconsistent | (not injected) | 8 (side effect) | ✓ rule works |
+
+
+**Key insights:** `los_inconsistent` firing on 8 rows as an *emergent* failure - the injection of date faults cacuse store `length_of_stay` values to become stale. The rule caught a cascading effect that we did not explicitly inject.
+
+
+### 6.5 Derived Column Staleness
+
+A stored derived column (like `length_of_stay`, computed from `discharge_date - date_of_admission` ) can go stale if its source columns change without the derived value being recomputed.
+
+**Design options:**
+1. Don't store derived columns - compute at query time. Always correct, but recomputed on every query.
+2. Store them, and recompute via trigger/ETL whenever source changes.
+3. Store them, and add a DQ rule to detect drift between stored and computed values.
+
+**Observed in this project:** Injecting date faults into `admission_chaos` caused `length_of_stay` to become stale in 8 rows (5 discharge-date faults + 3 future-date faults). The DQ rule `los_inconsistent` correctly flagged exactly those 8 rows - demonstrating that the rule works and that stored derived columns require active maintenance.
+
+**Decision for this project: store the derived column and recompute when source change.**
+
+Rationale:
+- **Query Performance:** `length_of_stay` is queried frequently in analytics and dashboard. A stored, indexable column is cheaper at scale than computing `DATEDIFF()` on every query.
+-**Single source of truth:** Storing forces one canonical definition. If it were different formulas (eg. inclusive vs exclusive of the discharge day) and produce conflicting numbers.
+-**Semantic clarity:** LOS is a first-class clinical concept and deserve to be a first-class column.
+
+Tradeoff accepted: potential staleness if source dates change without recomputation. Mitigated by the `los_inconsistent` DQ rule, which detects exactly this drift.
+
 ---
 
 ## 7. Project Structure
@@ -269,6 +306,7 @@ vbc-analytics/
 ---
 
 ## 8. Design Decision Log
+
 | Decision | Rationale |
 |----------|-----------|
 | Dropped `Name` at ingestion | PHI; no analytical value |
