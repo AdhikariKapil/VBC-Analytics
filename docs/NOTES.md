@@ -401,3 +401,5 @@ and executemany would error.
 the data. This is the standard way to clone a table in MySQL. Using
 `CREATE TABLE AS SELECT` would have skipped the primary key - which we want
 to keep.
+
+No quality_checks are the sql queries wihtout placecholder and dba and other just run them directly as queries in database to find out the result so they should be in /analytics/*.sql alongside /schema/*.sql or another name rather than analytics. So in short no inline sql but a standalone SQL
