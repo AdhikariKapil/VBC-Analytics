@@ -279,6 +279,14 @@ Rationale:
 
 Tradeoff accepted: potential staleness if source dates change without recomputation. Mitigated by the `los_inconsistent` DQ rule, which detects exactly this drift.
 
+### 6.6 DQ Check Organization
+
+- Rules live in `sql/checks/*.sql`, one file per category (structural, clinical). A DBA can run any file standalone.
+- The Python runner (`quality_checks.py`) auto-discovers all check files via glob and runs them against a configurable target table.
+- To retarget a check file to a different table, the runner does a surgical string replacement of `FROM admissionis` -- no placeholders in the SQL, so the file remains DBA-runnable.
+
+**Why one file per category and not per rule:** rules within a category share a query shape (UNION ALL of `SELECT rule_name, count`). Grouping by category keeps related rules together and produces a single result set per category, which the report formats as a table.
+
 ---
 
 ## 7. Project Structure

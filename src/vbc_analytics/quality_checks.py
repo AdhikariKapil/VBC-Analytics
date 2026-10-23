@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument(
         "--target",
         default="admissions",
-        choices=["admissions", "chaos_admission"],
+        choices=["admissions", "admission_chaos"],
         help="Table to run DQ checks against (default: admissions)",
     )
     return parser.parse_args()
@@ -54,11 +54,12 @@ def write_report(results: dict[str, list[tuple[str, int]]], target: str) -> Path
     lines.append("# Data Quality Report")
     lines.append("")
     lines.append(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    lines.append("")
     lines.append(f"**Target Table:** `{target}`")
     lines.append("")
 
     total_failures = 0
-    for category, rows in result.items():
+    for category, rows in results.items():
         lines.append(f"## {category.replace("_", " ").title()}")
         lines.append("")
         lines.append("| Rule | Failures |")
