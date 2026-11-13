@@ -287,6 +287,35 @@ Tradeoff accepted: potential staleness if source dates change without recomputat
 
 **Why one file per category and not per rule:** rules within a category share a query shape (UNION ALL of `SELECT rule_name, count`). Grouping by category keeps related rules together and produces a single result set per category, which the report formats as a table.
 
+### 6.7 Phase 2 Results - What the DQ Audit foundation
+**Ran against:** `admissions` (real) and `admission_chaos` (fault-injected copy)  
+**Real table results:**  
+| Rule | Failures |
+|------|----------|
+| age_out_of_range | 0 |
+| invalid_gender | 0 |
+| discharge_before_admission | 0 |
+| negative_room_number | 0 |
+| future_admission_date | 0 |
+| null_in_required_column | 0 |
+| los_inconsistent | 0 |
+| negative_billing | **108** |
+
+**Findings:** The only sturctural DQ issue in the souce data is 108 negative billing amounts. Every other sturctural rule passes cleanly.
+
+**Root cause:** The synthetic data generator likely produced `billing_amount` from an uncontrained normal distribution, so a small percentage of values landed below zero. Other coulumns were generated within bounded range (age 13-89, gender from a fixed set, dates built from `admission + N days`), which is why they're clean.
+
+**Chaos table results:** Toaol 147 failures = 31 injected + 108 real + 8 emergent LOS staleness. Every injected fault was caught exactly once, confirming all rules work.
+
+> "I wrote a DQ framework, validate it by injecting 31 known faults,
+> and confirmed the rules caught every one. Then I ran the same rules
+> against the real source and discovered 108 rows with negative
+> billing amounts -- a genuine data quality issue in the dataset.
+> In production, these would be quarantined to a `rejected_*` table
+> before the analytics layer consumed them."
+
+**Known limitation:** In a real claims-transaction table, negative billing is legitimate (reversals/adjustments). The rule fires here because this is an admissions *summary* table, where negative amounts are semantically impossible. Context defines correctness. 
+
 ---
 
 ## 7. Project Structure

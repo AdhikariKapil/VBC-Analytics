@@ -21,13 +21,13 @@ def parse_args():
     parser.add_argument(
         "--target",
         default="admissions",
-        choices=["admissions", "admission_chaos"],
+        choices=["admissions", "admissions_chaos"],
         help="Table to run DQ checks against (default: admissions)",
     )
     return parser.parse_args()
 
 
-def find_check_fiels() -> list[Path]:
+def find_check_files() -> list[Path]:
     # returns every .sql files under sql/validation
     files = sorted(CHECKS_DIR.glob("*.sql"))
     if not files:
@@ -83,7 +83,7 @@ def main():
     args = parse_args()
     log.info("Running DQ checks against '%s'", args.target)
 
-    files = find_check_fiels()
+    files = find_check_files()
     results: dict[str, list[tuple[str, int]]] = {}
 
     conn = get_connection()

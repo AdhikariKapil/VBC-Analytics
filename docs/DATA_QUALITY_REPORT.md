@@ -1,22 +1,22 @@
 # Data Quality Report
 
-**Generated:** 2026-10-23 22:01:25
+**Generated:** 2026-10-31 18:48:26
 
-**Target Table:** `admissions`
+**Target Table:** `admission_chaos`
 
 ## Structural Checks
 
 | Rule | Failures |
 |------|----------|
-| `age_out_of_range`✔️ | 0 |
-| `invalid_gender`✔️ | 0 |
-| `discharge_before_admission`✔️ | 0 |
-| `negative_room_number`✔️ | 0 |
-| `future_admission_date`✔️ | 0 |
-| `null_in_required_column`✔️ | 0 |
-| `los_inconsistent`✔️ | 0 |
-| `negative_billing` | 108 |
+| `age_out_of_range` | 5 |
+| `invalid_gender` | 5 |
+| `discharge_before_admission` | 5 |
+| `negative_room_number` | 3 |
+| `future_admission_date` | 3 |
+| `null_in_required_column` | 5 |
+| `los_inconsistent` | 8 |
+| `negative_billing` | 113 |
 
 ---
 
-**Total failures across all rules:** 108
+**Total failures across all rules:** 147

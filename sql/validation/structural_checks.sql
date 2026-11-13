@@ -1,6 +1,6 @@
 -- Every row returns (rule_name, failure_count)
 
--- All checks target the admission table by default. To run against another table, replace FROM admisson with FROM admission_chaos before executing.
+-- All checks target the admission table by default. To run against another table, replace FROM admisson with FROM admissions_chaos before executing.
 
 
 SELECT 'age_out_of_range' AS rule, COUNT(*) AS failures

@@ -1,3 +1,3 @@
-DROP TABLE IF EXISTS admission_chaos;
-CREATE TABLE admission_chaos LIKE admissions;
-INSERT INTO admission_chaos SELECT * FROM admissions;
+DROP TABLE IF EXISTS admissions_chaos;
+CREATE TABLE admissions_chaos LIKE admissions;
+INSERT INTO admissions_chaos SELECT * FROM admissions;
